@@ -110,7 +110,7 @@ let highScore = 0;
 
       snake.unshift(head);
 
-      if (head.x === food.x && head.y === food.y) {
+      if (Math.abs(head.x - food.x) < 1 && Math.abs(head.y - food.y) < 1) {
         food = {
           x: Math.floor(Math.random() * tileCount),
           y: Math.floor(Math.random() * tileCount)
