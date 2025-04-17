@@ -13,14 +13,12 @@
       text-align: center;
       margin: 0;
     }
-
     canvas {
       background: #111;
       border: 2px solid white;
       margin-top: 20px;
       touch-action: none;
     }
-
     .btn {
       padding: 10px 20px;
       margin: 5px;
@@ -34,8 +32,8 @@
 </head>
 <body>
   <h1>Snake Game</h1>
-  <h2 id='score'>Score: 0</h2>
-  <h3 id='highScore'>High Score: 0</h3>
+  <h2 id="score">Score: 0</h2>
+  <h3 id="highScore">High Score: 0</h3>
   <canvas id="game" width="300" height="300"></canvas>
 
   <div>
@@ -47,28 +45,38 @@
   </div>
 
   <script>
-    let canvas = document.getElementById("game");
-    let ctx = canvas.getContext("2d");
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
 
     const gridSize = 15;
     const tileCount = canvas.width / gridSize;
 
-    let snake, velocity, food, gameInterval;
-let highScore = 0;
+    let snake, velocity, food, gameInterval, score, highScore = 0;
+
+    function randomGridPosition() {
+      return Math.floor(Math.random() * tileCount);
+    }
+
+    function spawnFood() {
+      food = {
+        x: randomGridPosition(),
+        y: randomGridPosition()
+      };
+    }
 
     function resetGame() {
       snake = [{ x: 5, y: 5 }];
       velocity = { x: 1, y: 0 };
-      food = {
-        x: Math.floor(Math.random() * tileCount),
-        y: Math.floor(Math.random() * tileCount)
-      };
+      spawnFood();
+      score = 0;
+      document.getElementById('score').textContent = 'Score: ' + score;
+      document.getElementById('highScore').textContent = 'High Score: ' + highScore;
     }
 
     function startGame() {
       resetGame();
       clearInterval(gameInterval);
-      gameInterval = setInterval(gameLoop, 150);
+      gameInterval = setInterval(gameLoop, 120);
       draw();
     }
 
@@ -84,8 +92,8 @@ let highScore = 0;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.fillStyle = "lime";
-      snake.forEach(segment => {
-        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 1, gridSize - 1);
+      snake.forEach(part => {
+        ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 1, gridSize - 1);
       });
 
       ctx.fillStyle = "red";
@@ -110,17 +118,34 @@ let highScore = 0;
 
       snake.unshift(head);
 
-      if (Math.abs(head.x - food.x) < 1 && Math.abs(head.y - food.y) < 1) {
-        food = {
-          x: Math.floor(Math.random() * tileCount),
-          y: Math.floor(Math.random() * tileCount)
-        };
+      if (head.x === food.x && head.y === food.y) {
+        score += 100;
+        if (score > highScore) highScore = score;
+        document.getElementById('score').textContent = 'Score: ' + score;
+        document.getElementById('highScore').textContent = 'High Score: ' + highScore;
+        spawnFood();
+        try {
+          const sound = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
+          sound.volume = 0.5;
+          sound.play().catch(() => {});
+        } catch (e) {
+          console.log("Sound error:", e);
+        }
       } else {
         snake.pop();
       }
 
       draw();
     }
+
+    document.addEventListener("keydown", function(e) {
+      switch (e.key) {
+        case "ArrowUp": setDirection("up"); break;
+        case "ArrowDown": setDirection("down"); break;
+        case "ArrowLeft": setDirection("left"); break;
+        case "ArrowRight": setDirection("right"); break;
+      }
+    });
   </script>
 </body>
 </html>
